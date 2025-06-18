@@ -5,8 +5,12 @@ from config import EMAIL_SENDER, EMAIL_PASSWORD, EMAIL_RECEIVERS, SMTP_SERVER, S
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
+import os
 
 def send_email_report(html_content):
+    print("Debug: EMAIL_SENDER =", EMAIL_SENDER)
+    print("Debug: PASSWORD LOADED =", "Yes" if EMAIL_PASSWORD else "No")
+
     msg = MIMEMultipart("alternative")
     msg["Subject"] = "Market Report"
     msg["From"] = EMAIL_SENDER
@@ -14,10 +18,20 @@ def send_email_report(html_content):
 
     msg.attach(MIMEText(html_content, "html"))
 
-    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-        server.starttls()
-        server.login(EMAIL_SENDER, EMAIL_PASSWORD)
-        server.sendmail(EMAIL_SENDER, EMAIL_RECEIVERS, msg.as_string())
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.set_debuglevel(1)  # Enable verbose SMTP logging
+            server.starttls()
+            print("Logging in to SMTP...")
+            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            print("Login successful. Sending email...")
+            server.sendmail(EMAIL_SENDER, EMAIL_RECEIVERS, msg.as_string())
+            print("Email sent successfully.")
+    except smtplib.SMTPAuthenticationError as auth_error:
+        print("SMTP authentication failed:", auth_error)
+        print("Check if your EMAIL_SENDER matches the Gmail account used to generate the App Password.")
+    except Exception as e:
+        print(f"Unexpected error during email send: {str(e)}")
 
 def main():
     data = fetch_market_data()
@@ -34,11 +48,7 @@ def main():
         print("HTML report saved as Market_Report.html")
 
     # Send email report
-    try:
-        send_email_report(html_content)
-        print("HTML report emailed successfully.")
-    except Exception as e:
-        print(f"Failed to send email: {str(e)}")
+    send_email_report(html_content)
 
 if __name__ == "__main__":
     main()
