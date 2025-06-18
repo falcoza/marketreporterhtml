@@ -3,7 +3,7 @@ from datetime import datetime
 
 # Email Configuration
 EMAIL_SENDER = "ypanchia@gmail.com"
-EMAIL_PASSWORD = os.getenv("awrhsldbsacspkur")
+EMAIL_PASSWORD = os.getenv("GITHUBACTIONS_PASSWORD")
 EMAIL_RECEIVERS = [
     "yeshiel@dailymaverick.co.za"
 ]
