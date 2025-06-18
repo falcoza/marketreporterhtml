@@ -25,5 +25,7 @@ jobs:
           pip install yfinance pandas pycoingecko
 
       - name: Run market report
+        env:
+          GITHUBACTIONS_PASSWORD: ${{ secrets.GITHUBACTIONS_PASSWORD }}
         run: |
           python main.py
