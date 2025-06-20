@@ -2,8 +2,7 @@ name: Market Report Automation
 
 on:
   schedule:
-    # 05:00 and 17:00 SAST = 03:00 and 15:00 UTC
-    - cron: '0 3,15 * * 1-5'
+    - cron: '0 3,15 * * 1-5'  # 05:00 and 17:00 SAST
   workflow_dispatch:
 
 jobs:
@@ -29,20 +28,16 @@ jobs:
           GITHUBACTIONS_PASSWORD: ${{ secrets.GITHUBACTIONS_PASSWORD }}
         run: |
           python main.py
+          mkdir -p public
+          cp Market_Report.html feed.xml public/
 
       - name: Deploy to GitHub Pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Prepare output folder
-          mkdir -p public
-          cp Market_Report.html feed.xml public/
-
-          # Configure Git
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Create or switch to gh-pages branch
           git fetch origin
           git checkout --orphan gh-pages || git checkout gh-pages
           rm -rf *
@@ -50,7 +45,5 @@ jobs:
 
           git add .
           git commit -m "Update HTML and RSS feed" || echo "No changes to commit"
-
-          # Authenticate and push using GitHub Actions token
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
           git push origin HEAD:gh-pages --force
