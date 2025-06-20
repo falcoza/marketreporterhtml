@@ -1,7 +1,7 @@
 from data_fetcher import fetch_market_data
 from infographic_generator import generate_html_infographic
 from config import EMAIL_SENDER, EMAIL_PASSWORD, EMAIL_RECEIVERS, SMTP_SERVER, SMTP_PORT
-from rss_generator import generate_rss_feed  # ✅ New import
+from rss_generator import generate_rss_feed
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -50,7 +50,7 @@ def main():
     # Send email
     send_email_report(html_content)
 
-    # ✅ Save RSS feed
+    # Save RSS feed
     generate_rss_feed(data)
     print("RSS feed saved as feed.xml")
 
