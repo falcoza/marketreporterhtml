@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+  <channel>
+    <title>Daily Market Report</title>
+    <link>https://falcoza.github.io/marketreporterhtml/Market_Report.html</link>
+    <description>Automatically generated market reports and infographics, updated twice daily.</description>
+    <language>en-za</language>
+    <lastBuildDate>{{LAST_BUILD_DATE}}</lastBuildDate>
+
+    <item>
+      <title>Market Report for {{REPORT_DATE}}</title>
+      <link>https://falcoza.github.io/marketreporterhtml/Market_Report.html</link>
+      <guid isPermaLink="true">https://falcoza.github.io/marketreporterhtml/Market_Report.html</guid>
+      <pubDate>{{LAST_BUILD_DATE}}</pubDate>
+      <description><![CDATA[Click to view the full market infographic report.]]></description>
+    </item>
+  </channel>
+</rss>
