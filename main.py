@@ -1,6 +1,7 @@
 from data_fetcher import fetch_market_data
 from infographic_generator import generate_html_infographic
 from config import EMAIL_SENDER, EMAIL_PASSWORD, EMAIL_RECEIVERS, SMTP_SERVER, SMTP_PORT
+from rss_generator import generate_rss_feed  # ✅ New import
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -20,7 +21,7 @@ def send_email_report(html_content):
 
     try:
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.set_debuglevel(1)  # Enable verbose SMTP logging
+            server.set_debuglevel(1)
             server.starttls()
             print("Logging in to SMTP...")
             server.login(EMAIL_SENDER, EMAIL_PASSWORD)
@@ -29,7 +30,6 @@ def send_email_report(html_content):
             print("Email sent successfully.")
     except smtplib.SMTPAuthenticationError as auth_error:
         print("SMTP authentication failed:", auth_error)
-        print("Check if your EMAIL_SENDER matches the Gmail account used to generate the App Password.")
     except Exception as e:
         print(f"Unexpected error during email send: {str(e)}")
 
@@ -47,8 +47,12 @@ def main():
         f.write(html_content)
         print("HTML report saved as Market_Report.html")
 
-    # Send email report
+    # Send email
     send_email_report(html_content)
+
+    # ✅ Save RSS feed
+    generate_rss_feed(data)
+    print("RSS feed saved as feed.xml")
 
 if __name__ == "__main__":
     main()
