@@ -2,9 +2,8 @@ name: Market Report Automation
 
 on:
   schedule:
-    # 05:00 AM and 17:00 PM SAST = 03:00 and 15:00 UTC
-    - cron: '0 3,15 * * 1-5'
-  workflow_dispatch:  # allow manual runs
+    - cron: '0 3,15 * * 1-5'  # 05:00 & 17:00 SAST = 03:00 & 15:00 UTC
+  workflow_dispatch:
 
 jobs:
   generate-report:
@@ -27,16 +26,23 @@ jobs:
       - name: Run market report
         env:
           GITHUBACTIONS_PASSWORD: ${{ secrets.GITHUBACTIONS_PASSWORD }}
-        run: |
-          python main.py
+        run: python main.py
 
-      - name: Publish HTML and RSS to GitHub Pages
+      - name: Deploy to GitHub Pages
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git fetch origin gh-pages || echo "No gh-pages branch yet"
-          git checkout gh-pages || git checkout --orphan gh-pages
-          cp Market_Report.html feed.xml .
-          git add Market_Report.html feed.xml
-          git commit -m "Update market report and RSS feed" || echo "No changes to commit"
-          git push --force origin gh-pages
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create a temporary directory
+          mkdir deploy_dir
+          cp Market_Report.html feed.xml deploy_dir/
+
+          # Switch to gh-pages branch (create if needed)
+          git fetch origin
+          git checkout gh-pages 2>/dev/null || git checkout --orphan gh-pages
+          rm -rf *
+          cp deploy_dir/* .
+
+          git add .
+          git commit -m "Update HTML and RSS" || echo "No changes to commit"
+          git push origin gh-pages
