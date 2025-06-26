@@ -5,6 +5,7 @@ from rss_generator import generate_rss_feed
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
 import smtplib
 import os
 
@@ -12,13 +13,29 @@ def send_email_report(html_content):
     print("Debug: EMAIL_SENDER =", EMAIL_SENDER)
     print("Debug: PASSWORD LOADED =", "Yes" if EMAIL_PASSWORD else "No")
 
-    msg = MIMEMultipart("alternative")
+    msg = MIMEMultipart("mixed")  # Use 'mixed' to allow HTML + file attachments
     msg["Subject"] = "Market Report"
     msg["From"] = EMAIL_SENDER
     msg["To"] = ", ".join(EMAIL_RECEIVERS)
 
+    # Attach the HTML body
     msg.attach(MIMEText(html_content, "html"))
 
+    # Attach feed.xml
+    try:
+        with open("feed.xml", "rb") as xml_file:
+            xml_attachment = MIMEApplication(xml_file.read(), _subtype="xml")
+            xml_attachment.add_header(
+                'Content-Disposition',
+                'attachment',
+                filename="market_report_feed.xml"
+            )
+            msg.attach(xml_attachment)
+            print("feed.xml attached successfully.")
+    except Exception as e:
+        print(f"Warning: Could not attach feed.xml - {e}")
+
+    # Send the email
     try:
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
             server.set_debuglevel(1)
@@ -47,12 +64,12 @@ def main():
         f.write(html_content)
         print("HTML report saved as Market_Report.html")
 
-    # Send email
-    send_email_report(html_content)
-
-    # Save RSS feed
+    # Save RSS feed before sending
     generate_rss_feed(data)
     print("RSS feed saved as feed.xml")
+
+    # Send email (with feed.xml attached)
+    send_email_report(html_content)
 
 if __name__ == "__main__":
     main()
