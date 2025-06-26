@@ -1,18 +1,28 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+from datetime import datetime
+
+def generate_rss_feed(data):
+    now = datetime.now()
+    last_build_date = now.strftime("%a, %d %b %Y %H:%M:%S +0200")
+    report_date = now.strftime("%Y-%m-%d")
+
+    rss_template = f"""<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
   <channel>
     <title>Daily Market Report</title>
     <link>https://falcoza.github.io/marketreporterhtml/Market_Report.html</link>
     <description>Automatically generated market reports and infographics, updated twice daily.</description>
     <language>en-za</language>
-    <lastBuildDate>{{LAST_BUILD_DATE}}</lastBuildDate>
+    <lastBuildDate>{last_build_date}</lastBuildDate>
 
     <item>
-      <title>Market Report for {{REPORT_DATE}}</title>
+      <title>Market Report for {report_date}</title>
       <link>https://falcoza.github.io/marketreporterhtml/Market_Report.html</link>
       <guid isPermaLink="true">https://falcoza.github.io/marketreporterhtml/Market_Report.html</guid>
-      <pubDate>{{LAST_BUILD_DATE}}</pubDate>
+      <pubDate>{last_build_date}</pubDate>
       <description><![CDATA[Click to view the full market infographic report.]]></description>
     </item>
   </channel>
-</rss>
+</rss>"""
+
+    with open("feed.xml", "w", encoding="utf-8") as f:
+        f.write(rss_template)
