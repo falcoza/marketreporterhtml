@@ -8,35 +8,40 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import smtplib
 import os
-import shutil
+
 
 def send_email_report(html_content):
     print("Debug: EMAIL_SENDER =", EMAIL_SENDER)
     print("Debug: PASSWORD LOADED =", "Yes" if EMAIL_PASSWORD else "No")
 
-    msg = MIMEMultipart("mixed")
+    msg = MIMEMultipart("mixed")  # 'mixed' allows both HTML and attachments
     msg["Subject"] = "Market Report"
     msg["From"] = EMAIL_SENDER
     msg["To"] = ", ".join(EMAIL_RECEIVERS)
 
-    # Attach HTML body
+    # Attach the HTML body
     msg.attach(MIMEText(html_content, "html"))
 
-    # Attach feed.xml
+    # Attach feed.xml as application/rss+xml
     try:
         with open("feed.xml", "rb") as xml_file:
-            xml_attachment = MIMEApplication(xml_file.read(), _subtype="xml")
+            xml_data = xml_file.read()
+            xml_attachment = MIMEApplication(xml_data, _subtype="rss+xml")
             xml_attachment.add_header(
                 'Content-Disposition',
                 'attachment',
                 filename="market_report_feed.xml"
+            )
+            xml_attachment.add_header(
+                'Content-Type',
+                'application/rss+xml; charset=UTF-8'
             )
             msg.attach(xml_attachment)
             print("feed.xml attached successfully.")
     except Exception as e:
         print(f"Warning: Could not attach feed.xml - {e}")
 
-    # Send email
+    # Send the email
     try:
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
             server.set_debuglevel(1)
@@ -51,14 +56,6 @@ def send_email_report(html_content):
     except Exception as e:
         print(f"Unexpected error during email send: {str(e)}")
 
-def prepare_deploy_directory():
-    os.makedirs("public", exist_ok=True)
-    try:
-        shutil.copy("Market_Report.html", "public/Market_Report.html")
-        shutil.copy("feed.xml", "public/feed.xml")
-        print("Copied HTML and XML to public/ for GitHub Pages.")
-    except Exception as e:
-        print(f"Error copying files to public/: {e}")
 
 def main():
     data = fetch_market_data()
@@ -74,15 +71,13 @@ def main():
         f.write(html_content)
         print("HTML report saved as Market_Report.html")
 
-    # Generate and save RSS feed
+    # Save RSS feed before sending
     generate_rss_feed(data)
     print("RSS feed saved as feed.xml")
 
-    # Prepare for GitHub Pages deployment
-    prepare_deploy_directory()
-
-    # Send email with feed attachment
+    # Send email (with feed.xml attached)
     send_email_report(html_content)
+
 
 if __name__ == "__main__":
     main()
